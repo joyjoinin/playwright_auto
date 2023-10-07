@@ -14,13 +14,17 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
+  outputDir: 'test-results',
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    ['html', {outputFolder:'playwight-report'}]
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   timeout: 5 * 60 * 1000,
   use: {
@@ -28,7 +32,8 @@ export default defineConfig({
     // baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: process.env.CI ? 'on-first-retry' : 'on',
+    video: process.env.CI ? 'on-first-retry' : 'on',
     actionTimeout: 30 * 1000,
     navigationTimeout: 60 * 1000,
     viewport: {width: 1920, height: 1080}
@@ -36,9 +41,14 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome']},
+      use: { 
+        ...devices['Desktop Chrome'],
+        // storageState: '.auth/user.json',
+      },
+      
     },
 
     // {
