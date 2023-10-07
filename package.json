@@ -3,12 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "pretest": "tsc --incremental -p tests/tsconfig.json",
+    "test": "playwright test -c tests-out"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.39.0-alpha-sep-13-2023"
+    "@playwright/test": "^1.39.0-alpha-sep-13-2023",
+    "dotenv": "^16.3.1",
+    "prettier": "3.0.3"
   },
   "dependencies": {
     "axios": "^1.5.1",
