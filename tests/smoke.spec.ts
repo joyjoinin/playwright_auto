@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
-import { LoginPage } from "../common/loginPage";
+import { LoginPage } from "../common/pages/loginPage";
 import moment from "moment";
-import { SchedulePage, ScheduleDetails } from "../common/schedulePage";
+import { SchedulePage, ScheduleDetails } from "../common/pages/schedulePage";
+import { HomePage } from "../common/pages/homePage";
 
 test.describe("create show", () => {
   test("test", async ({ page }) => {
@@ -16,6 +17,9 @@ test.describe("create show", () => {
     await login.fill_form("joy@57blocks.com", "joy159753ty,.");
     await page.goto("https://dev.fanatics.live/shops/fanatics-live/manage");
 
+    const home = new HomePage(page);
+    await home.scheduleNewShow();
+
     const schedule = new SchedulePage(page);
     const scheduleDetails: ScheduleDetails = {
       showName: showName,
@@ -28,20 +32,6 @@ test.describe("create show", () => {
 
     await schedule.scheduleNewShow(scheduleDetails);
     await page.waitForTimeout(10000);
-
-    // await page.getByRole("button", { name: "Schedule a show" }).click();
-    // await page.getByPlaceholder("Keep it short and sweet").fill(showName);
-    // const fileInput = page.locator("input#cover_image_upload");
-    // await page.waitForTimeout(2000);
-    // fileInput && (await fileInput.setInputFiles("./img.png"));
-    // await page.waitForTimeout(3000);
-    // await page.locator("#startsAtDate").fill(startDate);
-    // await page.locator("#startsAtTime").fill(startTime);
-    // await page.locator("#live_stream-form_channel_id").selectOption("joy 1/7");
-    // await page
-    //   .locator("#live_stream-form_staffers_0_id")
-    //   .selectOption("joy@57blocks.com");
-    // await page.getByRole("button", { name: "Add listings" }).click();
 
     // await page.waitForTimeout(5000);
     // await page.getByLabel("Title").fill("random set");
@@ -119,6 +109,7 @@ test.describe("create show", () => {
     //   .click();
     // await page.waitForTimeout(1000);
     // await page.getByRole("button", { name: "Schedule show" }).click();
+
     // await page.getByPlaceholder("Search Streams").fill(showName);
     // await expect(page.getByRole("heading", { name: showName })).toBeVisible({
     //   timeout: 10000,
