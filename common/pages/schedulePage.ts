@@ -18,9 +18,9 @@ export class SchedulePage {
   readonly date: Locator;
   readonly time: Locator;
   readonly channel: Locator;
-  readonly descirption: Locator;
+  // readonly descirption: Locator;
   readonly breakerOne: Locator;
-  readonly breakerTwo: Locator;
+  // readonly breakerTwo: Locator;
   readonly addListings: Locator;
 
   constructor(page: Page) {
@@ -37,7 +37,7 @@ export class SchedulePage {
   async scheduleNewShow(scheduleDetails: ScheduleDetails) {
     await this.showTitle.fill(scheduleDetails.showName);
     const input = this.coverImage;
-    await this.page.waitForTimeout(2000);
+    await this.page.waitForTimeout(3000);
     input && (await input.setInputFiles(scheduleDetails.imgFile));
     await this.page.waitForTimeout(3000);
     await this.date.fill(scheduleDetails.date);

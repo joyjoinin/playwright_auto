@@ -17,6 +17,6 @@
       "sourceMap": true,
       "outDir": "../tests-out",
     },
-    "include": ["**/*.js"],
+    "include": ["**/*.ts"],
     "exclude": ["node_modules"]
   }

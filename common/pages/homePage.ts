@@ -12,4 +12,20 @@ export class HomePage {
   async scheduleNewShow() {
     await this.scheduleShow.click();
   }
+
+  async searchShow(showName: string) {
+    await this.page.getByPlaceholder("Search Streams").fill(showName);
+    await expect(
+      this.page.getByRole("heading", { name: showName })
+    ).toBeVisible({
+      timeout: 10000,
+    });
+    await this.page.locator('button[title="Details"]').first().click();
+  }
 }
+
+// await page.getByPlaceholder("Search Streams").fill(showName);
+// await expect(page.getByRole("heading", { name: showName })).toBeVisible({
+//   timeout: 10000,
+// });
+// await page.locator('button[title="Details"]').first().click();

@@ -1,5 +1,28 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
+export interface Listing {
+  listingTitle: string;
+  listingName: string;
+  pricePerSpot?: string;
+  assignPrices?: string;
+  minbid?: string;
+  breakExtras?: {
+    extendedBidding?: boolean;
+    extrasType?:
+      | {
+          extrasType: "stashOrPass";
+          miniRequired: string;
+        }
+      | {
+          extrasType: "pick2Choose1";
+          miniRequired: string;
+        }
+      | {
+          extrasType: "None";
+        };
+  };
+}
+
 export class ListingsPage {
   readonly page: Page;
   readonly listingTitle: Locator;
@@ -11,111 +34,132 @@ export class ListingsPage {
   readonly saveListing: Locator;
   readonly scheduleShow: Locator;
   readonly saveShowAsDraft: Locator;
-  readonly addListings: Locator;
   readonly pricePerSpot: Locator;
   readonly assignPrices: Locator;
   readonly miniBid: Locator;
   readonly breakExtras: Locator;
+  readonly minRequired: Locator;
+  readonly extendedBidding: Locator;
   readonly saveExtras: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.listingTitle = page.getByRole("button", { name: "Schedule a show" });
-    this.listingName = page.getByPlaceholder("Keep it short and sweet");
-    this.random = page.locator("input#cover_image_upload");
-    this.pickYourSpot = page.locator("#startsAtDate");
-    this.setPrice = page.locator("#startsAtTime");
-    this.auction = page.locator("#live_stream-form_channel_id");
-    this.saveListing = page.locator("#live_stream-form_staffers_0_id");
-    this.scheduleShow = page.getByRole("button", { name: "Add listings" });
-    this.saveShowAsDraft = page.getByRole("button", { name: "Add listings" });
-    this.addListings = page.getByRole("button", { name: "Add listings" });
-    this.pricePerSpot = page.getByRole("button", { name: "Add listings" });
-    this.assignPrices = page.getByRole("button", { name: "Add listings" });
-    this.miniBid = page.getByRole("button", { name: "Add listings" });
-    this.breakExtras = page.getByRole("button", { name: "Add listings" });
-    this.saveExtras = page.getByRole("button", { name: "Add listings" });
+    this.listingTitle = page.getByLabel("Title");
+    this.listingName = page.locator("#create-listing-form_break_template_id");
+    this.random = page.getByText("Random", { exact: true });
+    this.pickYourSpot = page.getByText("Pick your spot", { exact: true });
+    this.setPrice = page.getByText("Set price", { exact: true });
+    this.auction = page.getByText("Auction", { exact: true });
+    this.saveListing = page.getByRole("button", {
+      name: "Save listing and add another",
+    });
+    this.scheduleShow = page.getByRole("button", { name: "Schedule show" });
+    this.saveShowAsDraft = page.getByRole("button", {
+      name: "Save show as draft",
+    });
+    this.pricePerSpot = page.locator("#create-listing-form_price_in_cents");
+    this.assignPrices = page.locator(
+      '[data-test-id="toggle-spot-pricing-modal-button"]'
+    );
+    this.miniBid = page.locator("#create-listing-form_minimum_bid_in_cents");
+    this.breakExtras = page.locator("span").filter({ hasText: "Break extras" });
+    this.minRequired = page.getByLabel("Minimum required");
+    this.extendedBidding = page.locator(
+      "#create-listing-form_extended_bidding_enabled"
+    );
+    this.saveExtras = page.getByRole("button", { name: "Save", exact: true });
   }
 
-  async addRandomSetPrice() {}
-  async addRandomAuction() {}
-  async addPickYourSpotSetPrice() {}
-  async addPickYourSpotAuction() {}
+  async commonBegin(listing: Listing) {
+    await this.listingTitle.fill(listing.listingTitle);
+    await this.listingName.selectOption(listing.listingName);
+  }
+
+  async commonFinish() {
+    await this.page.waitForTimeout(1000);
+    await this.saveListing.click();
+    await this.page.waitForTimeout(1000);
+  }
+
+  async addRandomSetPrice(listing: Listing) {
+    await this.commonBegin(listing);
+    await this.random.click();
+    await this.setPrice.click();
+    await this.page.waitForTimeout(1000);
+    listing.pricePerSpot &&
+      (await this.pricePerSpot.fill(listing.pricePerSpot));
+    await this.commonFinish();
+  }
+  async addRandomAuction(listing: Listing) {
+    await this.commonBegin(listing);
+    await this.random.click();
+    await this.auction.click();
+    if (listing.breakExtras) {
+      await this.breakExtras.click();
+      switch (listing.breakExtras.extrasType?.extrasType) {
+        case "stashOrPass":
+          await this.page
+            .locator("#create-listing-form_break_mechanic_type_stash_or_pass")
+            .check();
+          await this.minRequired.fill(
+            listing.breakExtras.extrasType?.miniRequired
+          );
+          break;
+        case "pick2Choose1":
+          await this.page
+            .locator("#create-listing-form_break_mechanic_type_pick_2_choose_1")
+            .check();
+          await this.minRequired.fill(
+            listing.breakExtras.extrasType?.miniRequired
+          );
+          break;
+        case "None":
+          await this.page
+            .locator("#create - listing - form_break_mechanic_type_")
+            .check();
+          break;
+      }
+      listing.breakExtras.extendedBidding && this.extendedBidding.check();
+      await this.saveExtras.click();
+    }
+    listing.minbid && (await this.miniBid.fill(listing.minbid));
+    await this.page.waitForTimeout(1000);
+    await this.commonFinish();
+  }
+  async addPickYourSpotSetPrice(listing: Listing) {
+    await this.commonBegin(listing);
+    await this.listingTitle.fill(listing.listingTitle);
+    await this.listingName.selectOption(listing.listingName);
+    await this.pickYourSpot.click();
+    await this.setPrice.click();
+    await this.assignPrices.click();
+    if (listing.assignPrices) {
+      var i = 0;
+      for (; i < 30; ) {
+        await this.page
+          .locator(`[data-test-id="price_input_${i}"]`)
+          .fill(listing.assignPrices);
+        i++;
+      }
+    }
+    await this.page.locator('[data-test-id="assign-prices-button"]').click();
+    await this.commonFinish();
+  }
+  async addPickYourSpotAuction(listing: Listing) {
+    await this.commonBegin(listing);
+    await this.pickYourSpot.click();
+    await this.auction.click();
+    if (listing.breakExtras?.extendedBidding) {
+      this.breakExtras.click();
+      this.extendedBidding.check();
+      await this.page.waitForTimeout(1000);
+      await this.saveExtras.click();
+    }
+    listing.minbid && (await this.miniBid.fill(listing.minbid));
+    await this.commonFinish();
+  }
+
+  async scheduleThisShow() {
+    await this.scheduleShow.click();
+  }
 }
-
-// await page.waitForTimeout(5000);
-// await page.getByLabel("Title").fill("random set");
-// await page
-//   .locator("#create-listing-form_break_template_id")
-//   .selectOption("NBA 30 Team");
-// await page.getByText("Random", { exact: true }).click();
-// await page.getByText("Set price", { exact: true }).click();
-// await page.waitForTimeout(1000);
-// await page.locator("#create-listing-form_price_in_cents").fill("1000");
-// await page.waitForTimeout(1000);
-// await page
-//   .getByRole("button", { name: "Save listing and add another" })
-//   .click();
-// await page.waitForTimeout(1000);
-
-// await page.getByLabel("Title").fill("random auction");
-// await page
-//   .locator("#create-listing-form_break_template_id")
-//   .selectOption("NBA 30 Team");
-// await page.getByText("Random", { exact: true }).click();
-// await page.getByText("Auction", { exact: true }).click();
-// await page.waitForTimeout(1000);
-// await page.locator("span").filter({ hasText: "Break extras" }).click();
-// await page
-//   .locator("#create-listing-form_break_mechanic_type_stash_or_pass")
-//   .check();
-// await page.waitForTimeout(1000);
-// await page.getByLabel("Minimum required").fill("100");
-// await page.waitForTimeout(1000);
-// await page.getByRole("button", { name: "Save", exact: true }).click();
-// await page.locator("#create-listing-form_minimum_bid_in_cents").fill("100");
-// await page.waitForTimeout(1000);
-// await page
-//   .getByRole("button", { name: "Save listing and add another" })
-//   .click();
-// await page.waitForTimeout(1000);
-// await page.getByLabel("Title").fill("pick set");
-// await page
-//   .locator("#create-listing-form_break_template_id")
-//   .selectOption("NBA 30 Team");
-// await page.getByText("Pick your spot", { exact: true }).click();
-// await page.getByText("Set price", { exact: true }).click();
-// await page.waitForTimeout(1000);
-// await page
-//   .locator('[data-test-id="toggle-spot-pricing-modal-button"]')
-//   .click();
-// var i = 0;
-// for (; i < 30; ) {
-//   await page.locator(`[data-test-id="price_input_${i}"]`).fill("100");
-//   i++;
-// }
-// await page.locator('[data-test-id="assign-prices-button"]').click();
-// await page
-//   .getByRole("button", { name: "Save listing and add another" })
-//   .click();
-// await page.waitForTimeout(1000);
-
-// await page.getByLabel("Title").fill("set auction");
-// await page
-//   .locator("#create-listing-form_break_template_id")
-//   .selectOption("NBA 30 Team");
-// await page.getByText("Pick your spot", { exact: true }).click();
-// await page.getByText("Auction", { exact: true }).click();
-// await page.waitForTimeout(1000);
-// await page.locator("span").filter({ hasText: "Break extras" }).click();
-// await page.getByLabel("Extended bidding").check();
-// await page.getByRole("button", { name: "Save", exact: true }).click();
-// await page
-//   .locator("#create-listing-form_minimum_bid_in_cents")
-//   .fill("1000");
-// await page.waitForTimeout(2000);
-// await page
-//   .getByRole("button", { name: "Save listing and add another" })
-//   .click();
-// await page.waitForTimeout(1000);
-// await page.getByRole("button", { name: "Schedule show" }).click();

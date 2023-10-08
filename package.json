@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.39.0-alpha-sep-13-2023",
+    "@types/node": "^20.8.3",
     "dotenv": "^16.3.1",
     "prettier": "3.0.3"
   },

@@ -33,7 +33,7 @@ export default defineConfig({
     // trace: process.env.CI ? "on-first-retry" : "on",
     // video: process.env.CI ? "on-first-retry" : "on",
 
-    actionTimeout: 30 * 1000,
+    actionTimeout: 10 * 1000,
     navigationTimeout: 60 * 1000,
     viewport: { width: 1920, height: 1080 },
   },

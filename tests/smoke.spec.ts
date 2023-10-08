@@ -3,24 +3,18 @@ import { LoginPage } from "../common/pages/loginPage";
 import moment from "moment";
 import { SchedulePage, ScheduleDetails } from "../common/pages/schedulePage";
 import { HomePage } from "../common/pages/homePage";
+import { ListingsPage, Listing } from "../common/pages/listingsPage";
 
 test.describe("create show", () => {
   test("test", async ({ page }) => {
+    const login = new LoginPage(page);
+    const home = new HomePage(page);
+    const schedule = new SchedulePage(page);
+    const listingPage = new ListingsPage(page);
+
     let startDate = moment().utc().format("YYYY-MM-DD");
     let startTime = moment().utc().format("HH:mm");
     let showName = "smoke" + startDate + startTime;
-
-    const login = new LoginPage(page);
-    await login.goto(
-      "https://zerocool:XQZlx6iprxItlugXiiYcTp@dev.fanatics.live"
-    );
-    await login.fill_form("joy@57blocks.com", "joy159753ty,.");
-    await page.goto("https://dev.fanatics.live/shops/fanatics-live/manage");
-
-    const home = new HomePage(page);
-    await home.scheduleNewShow();
-
-    const schedule = new SchedulePage(page);
     const scheduleDetails: ScheduleDetails = {
       showName: showName,
       imgFile: "./img.png",
@@ -29,11 +23,43 @@ test.describe("create show", () => {
       channel: "joy 1/7",
       breakerOne: "joy@57blocks.com",
     };
+    const randomSetlisting: Listing = {
+      listingTitle: "random set",
+      listingName: "NBA 30 Team",
+      pricePerSpot: "1000",
+    };
+    const randomAuctionlisting: Listing = {
+      listingTitle: "random auction",
+      listingName: "NBA 30 Team",
+      minbid: "100",
+    };
+    const pickSetlisting: Listing = {
+      listingTitle: "pick set",
+      listingName: "NBA 30 Team",
+      assignPrices: "100",
+    };
+    const pickAuctionlisting: Listing = {
+      listingTitle: "pick auction",
+      listingName: "NBA 30 Team",
+      minbid: "100",
+    };
 
+    await login.goto(
+      "https://zerocool:XQZlx6iprxItlugXiiYcTp@dev.fanatics.live"
+    );
+    await login.fill_form("joy@57blocks.com", "joy159753ty,.");
+    await page.goto("https://dev.fanatics.live/shops/fanatics-live/manage");
+
+    await home.scheduleNewShow();
     await schedule.scheduleNewShow(scheduleDetails);
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
 
-    // await page.waitForTimeout(5000);
+    await listingPage.addPickYourSpotAuction(pickAuctionlisting);
+    await listingPage.addPickYourSpotSetPrice(pickSetlisting);
+    await listingPage.addRandomAuction(randomAuctionlisting);
+    await listingPage.addRandomSetPrice(randomSetlisting);
+    await listingPage.scheduleThisShow();
+    await home.searchShow(showName);
     // await page.getByLabel("Title").fill("random set");
     // await page
     //   .locator("#create-listing-form_break_template_id")
