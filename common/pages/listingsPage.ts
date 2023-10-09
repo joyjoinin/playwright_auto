@@ -161,5 +161,6 @@ export class ListingsPage {
 
   async scheduleThisShow() {
     await this.scheduleShow.click();
+    await expect(this.page.getByText("Live stream published")).toBeVisible();
   }
 }

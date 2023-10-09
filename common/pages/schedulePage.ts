@@ -45,5 +45,9 @@ export class SchedulePage {
     await this.channel.selectOption(scheduleDetails.channel);
     await this.breakerOne.selectOption(scheduleDetails.breakerOne);
     await this.addListings.click();
+    await this.page.waitForTimeout(5000);
+    await expect(this.page.locator("#starts_at_date")).not.toBeEmpty({
+      timeout: 10000,
+    });
   }
 }
