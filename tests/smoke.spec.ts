@@ -5,6 +5,9 @@ import { HomePage } from "../common/pages/homePage";
 import { ListingsPage, Listing } from "../common/pages/listingsPage";
 import { LivePage } from "../common/pages/livePage";
 import moment from "moment";
+import { loginParams } from "../common/params/loginParams";
+import { scheduleParams } from "../common/params/scheduleParams";
+import { listingsParams } from "../common/params/listingsParams";
 
 test.describe("create show", () => {
   test("test", async ({ page }) => {
@@ -13,52 +16,31 @@ test.describe("create show", () => {
     const schedule = new SchedulePage(page);
     const listingPage = new ListingsPage(page);
     const livePage = new LivePage(page);
-    const loginUrl =
-      "https://zerocool:XQZlx6iprxItlugXiiYcTp@dev.fanatics.live";
-    const manageUrl = "https://dev.fanatics.live/shops/fanatics-live/manage";
-    const account = { email: "joy@57blocks.com", password: "joy159753ty,." };
     const startDate = moment().utc().format("YYYY-MM-DD");
     const startTime = moment().utc().format("HH:mm");
     const showName = "smoke" + startDate + startTime;
     const scheduleDetails: ScheduleDetails = {
       showName: showName,
-      imgFile: "./img.png",
+      imgFile: scheduleParams.imgPath,
       date: startDate,
       time: startTime,
-      channel: "joy 1/7",
-      breakerOne: "joy@57blocks.com",
-    };
-    const randomSetlisting: Listing = {
-      listingTitle: "random set",
-      listingName: "NBA 30 Team",
-      pricePerSpot: "1000",
-    };
-    const randomAuctionlisting: Listing = {
-      listingTitle: "random auction",
-      listingName: "NBA 30 Team",
-      minbid: "100",
-    };
-    const pickSetlisting: Listing = {
-      listingTitle: "pick set",
-      listingName: "NBA 30 Team",
-      assignPrices: "100",
-    };
-    const pickAuctionlisting: Listing = {
-      listingTitle: "pick auction",
-      listingName: "NBA 30 Team",
-      minbid: "100",
+      channel: scheduleParams.channel,
+      breakerOne: scheduleParams.breakerOne,
     };
 
-    await login.goto(loginUrl);
-    await login.fill_form(account.email, account.password);
-    await login.goto(manageUrl);
+    await login.goto(loginParams.loginUrl);
+    await login.fill_form(
+      loginParams.account.email,
+      loginParams.account.password
+    );
+    await login.goto(loginParams.manageUrl);
 
     await home.scheduleNewShow();
     await schedule.scheduleNewShow(scheduleDetails);
-    // await listingPage.addPickYourSpotAuction(pickAuctionlisting);
-    // await listingPage.addPickYourSpotSetPrice(pickSetlisting);
-    // await listingPage.addRandomAuction(randomAuctionlisting);
-    // await listingPage.addRandomSetPrice(randomSetlisting);
+    await listingPage.addPickYourSpotAuction(listingsParams.pickAuctionlisting);
+    await listingPage.addPickYourSpotSetPrice(listingsParams.pickSetlisting);
+    await listingPage.addRandomAuction(listingsParams.randomAuctionlisting);
+    await listingPage.addRandomSetPrice(listingsParams.randomSetlisting);
     await listingPage.scheduleThisShow();
     await home.searchShow(showName);
     await page.waitForTimeout(5000);
