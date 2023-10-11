@@ -25,7 +25,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   timeout: 5 * 60 * 1000,
   use: {
-    // headless: false,
+    headless: false,
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
@@ -41,14 +41,15 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
 
-        // storageState: '.auth/user.json',
+        storageState: ".auth/user.json",
       },
+      dependencies: ["setup"],
     },
 
     // {

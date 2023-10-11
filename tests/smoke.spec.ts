@@ -28,12 +28,8 @@ test.describe("create show", () => {
       breakerOne: scheduleParams.breakerOne,
     };
 
-    await login.goto(loginParams.loginUrl);
-    await login.fill_form(
-      loginParams.account.email,
-      loginParams.account.password
-    );
-    await login.goto(loginParams.manageUrl);
+    await page.goto(loginParams.loginUrl);
+    await page.goto(loginParams.manageUrl);
 
     await home.scheduleNewShow();
     await schedule.scheduleNewShow(scheduleDetails);
