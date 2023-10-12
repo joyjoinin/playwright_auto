@@ -10,9 +10,10 @@ setup("authenticate", async ({ page }) => {
   await login.goto(loginParams.loginUrl);
   await login.fill_form(
     loginParams.account.email,
-    loginParams.account.password
+    loginParams.account.password,
+    loginParams.manageUrl
   );
-  await login.goto(loginParams.manageUrl);
+  // await login.goto(loginParams.manageUrl);
 
   await page.context().storageState({ path: authFile });
   await page.close();

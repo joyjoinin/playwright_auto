@@ -1,5 +1,5 @@
 export const scheduleParams = {
   imgPath: "./img.png",
-  channel: "joy 1/7",
-  breakerOne: "joy@57blocks.com",
+  channel: "joy",
+  breakerOne: "joy+666@57blocks.com",
 };
